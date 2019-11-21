@@ -36,7 +36,7 @@ def linprog_solver(value_matrix):
     bounds.append((None, None))
 
     res = linprog(C, A_ub=A, b_ub=B, A_eq=A_eq, b_eq=B_eq, bounds=bounds)
-    return res
+    return res['x'][:,-1], res['fun']
 
 
 def run():

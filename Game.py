@@ -7,11 +7,11 @@ class Game:
     def get_n_states(self):
         return len(self.states)
 
-    def get_action_reward(self, state):
+    def get_state_reward(self, state):
         return self.rewards[state]
 
-    def get_action_transition(self, state):
-        return self.transitions[state]
+    def get_state_transition(self, action_pair):
+        return self.transitions[action_pair[0]][action_pair[1]]
 
     def get_state(self, state):
         return self.state_index_mapping[state]
