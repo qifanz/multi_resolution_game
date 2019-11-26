@@ -2,6 +2,7 @@ from scipy.optimize import linprog
 import numpy as np
 import nashpy as nash
 
+
 def __linprog_solver_col(value_matrix):
     m, n = value_matrix.shape
 
@@ -13,7 +14,7 @@ def __linprog_solver_col(value_matrix):
     C.append(-1)
     A = []
     for i_col in range(n):
-        col = value_matrix[:,i_col]
+        col = value_matrix[:, i_col]
         constraint_row = []
         for item in col:
             constraint_row.append(-item)
@@ -39,8 +40,11 @@ def __linprog_solver_col(value_matrix):
     res = linprog(C, A_ub=A, b_ub=B, A_eq=A_eq, b_eq=B_eq, bounds=bounds)
     return res['x'][:-1], -res['fun']
 
+
 def __linprog_solver_row(value_matrix):
-    return __linprog_solver_col(-value_matrix.T)
+    policy, value = __linprog_solver_col(-value_matrix.T)
+    return policy, -value
+
 
 def linprog_solve(value_matrix):
     rps = nash.Game(np.array(value_matrix))
@@ -48,6 +52,7 @@ def linprog_solve(value_matrix):
     policy_x, policy_y = list(eqs)[0]
     _, value = __linprog_solver_row(value_matrix)
     return value, policy_x, policy_y
+
 
 def run():
     v = [
