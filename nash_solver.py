@@ -1,8 +1,8 @@
 from scipy.optimize import linprog
 import numpy as np
+import nashpy as nash
 
-
-def linprog_solver(value_matrix):
+def __linprog_solver_col(value_matrix):
     m, n = value_matrix.shape
 
     # solve col
@@ -12,9 +12,10 @@ def linprog_solver(value_matrix):
         C.append(0)
     C.append(-1)
     A = []
-    for row in value_matrix:
+    for i_col in range(n):
+        col = value_matrix[:,i_col]
         constraint_row = []
-        for item in row:
+        for item in col:
             constraint_row.append(-item)
         constraint_row.append(1)
         A.append(constraint_row)
@@ -36,16 +37,28 @@ def linprog_solver(value_matrix):
     bounds.append((None, None))
 
     res = linprog(C, A_ub=A, b_ub=B, A_eq=A_eq, b_eq=B_eq, bounds=bounds)
-    return res['x'][:,-1], res['fun']
+    return res['x'][:-1], -res['fun']
 
+def __linprog_solver_row(value_matrix):
+    return __linprog_solver_col(-value_matrix.T)
+
+def linprog_solve(value_matrix):
+    rps = nash.Game(np.array(value_matrix))
+    eqs = rps.support_enumeration()
+    policy_x, policy_y = list(eqs)[0]
+    _, value = __linprog_solver_row(value_matrix)
+    return value, policy_x, policy_y
 
 def run():
-    value_matrix = [
-        [0, 1, -1],
-        [-1, 0, 1],
-        [1, -1, 0]
+    v = [
+        [4, 3, 7],
+        [1, 2, 3],
+        [2, 4, 6]
     ]
-    res = linprog_solver(np.array(value_matrix))
+    v = np.array(v)
+    policy_x, value_x = __linprog_solver_row(v)
+    policy_y, value_y = __linprog_solver_col(v)
+    linv, linx, liny = linprog_solve(v)
     print('done')
 
 

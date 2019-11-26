@@ -17,10 +17,10 @@ class Game:
         return self.state_index_mapping[state]
 
     def initialize_states(self):
-        return [],[]
+        return [0, 1, 2]
 
     def initialize_rewards(self):
-        return []
+        return [1, -1, 2]
 
     def initialize_transitions(self):
         return []
