@@ -65,6 +65,3 @@ def run():
     policy_y, value_y = __linprog_solver_col(v)
     linv, linx, liny = linprog_solve(v)
     print('done')
-
-
-run()

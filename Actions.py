@@ -1,1 +1,1 @@
-N_ACTIONS = 2
+N_ACTIONS = 4
