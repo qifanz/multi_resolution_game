@@ -92,4 +92,3 @@ class MatrixGameSolver:
         left = self.__calc_J(new_psi) - j_v
         right = self.alpha * w * np.dot(self.__calc_delta_J(psi_v, I_subtract_P), d_k)
         return left <= right
-

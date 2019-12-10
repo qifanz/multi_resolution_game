@@ -1,4 +1,9 @@
 import numpy as np
+from Actions import *
+
+STANDARD_REWARD = 1
+CRASH_REWARD = -10
+END_REWARD = -10
 
 
 class Game:
@@ -7,7 +12,7 @@ class Game:
         self.n_cols = 3
         self.n_blocks = self.n_rows * self.n_cols
         self.states = self.initialize_states()
-        self.crash_blocks = [(1,2)]
+        self.crash_blocks = [(1, 2)]
         self.rewards = self.initialize_rewards()
         self.transitions = self.initialize_transitions()
 
@@ -64,41 +69,34 @@ class Game:
 
     def __get_crash_states(self):
         '''
-        Get if a state is a crashed state (cannot be recoverd, absorbing state)
-        :param state: index of state
-        :return: is crashed
+        Get list of crash states
+        :return: an array of crash states' index
         '''
-        return state in self.crash_states
+        crash_states = []
+        for crash_block in self.crash_blocks:
+            for i in range(self.n_rows):
+                for j in range(self.n_cols):
+                    if (i, j) != crash_block:
+                        crash_states.append(self.__rc2state(i, j, crash_block[0], crash_block[1]))
+                        crash_states.append(self.__rc2state(crash_block[0], crash_block[1], i, j))
+        return crash_states
 
     def initialize_states(self):
         return np.arange(0, self.n_blocks)
 
     def initialize_rewards(self):
-        rewards = np.ones(self.n_blocks)
+        rewards = np.ones(self.n_blocks) * STANDARD_REWARD
+        for crash_state in self.__get_crash_states():
+            rewards[crash_state] = CRASH_REWARD
+        for i in range(self.n_rows):
+            for j in range(self.n_cols):
+                rewards[self.__rc2state(i, j, i, j)] = END_REWARD
+        return rewards
 
     def initialize_transitions(self):
-        action_0_1 = [
-            [0.1, 0.8, 0.1],
-            [0.3, 0.4, 0.3],
-            [0.2, 0.5, 0.3]
-        ]
-        action_1_0 = [
-            [0.1, 0.8, 0.1],
-            [0.3, 0.4, 0.3],
-            [0.2, 0.5, 0.3]
-        ]
-        action_0_0 = [
-            [0.7, 0.1, 0.2],
-            [0.3, 0.3, 0.4],
-            [0.1, 0.1, 0.8]
-        ]
+        whole_transition_matrix = np.zeros((N_ACTIONS, N_ACTIONS))
+        n_states = self.get_n_states()
+        for action1 in N_ACTIONS:
+            for actions2 in N_ACTIONS:
+                transition_matrix = np.zeros((n_states, n_states))
 
-        action_1_1 = [
-            [0.2, 0.1, 0.7],
-            [0.3, 0.3, 0.4],
-            [0.2, 0.3, 0.5]
-        ]
-        return [
-            [action_0_0, action_0_1],
-            [action_1_0, action_1_1]
-        ]
