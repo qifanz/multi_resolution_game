@@ -10,15 +10,17 @@ class MatrixGameSolver:
         self.mu = 0.6
         self.gamma = 0.9
         self.beta = 0.8
-        self.value_vector = np.zeros(game.get_n_states())  # set 0 for initial estimation
+        self.value_vector = game.rewards #set initial estimation to rewards
 
     def solve(self):
         converge_flag = False
+        iteration = 0
         while not converge_flag:
+            iteration+=1
             L_v, policy = self.__calc_L()
             psi_v = self.__calc_psi(L_v, self.value_vector)
             J_v = self.__calc_J(psi_v)
-            if J_v <= 10e-6:
+            if J_v <= 10e-20:
                 converge_flag = True
             else:
                 D_k, I_subtract_P = self.__cal_D(policy, psi_v)
@@ -31,9 +33,10 @@ class MatrixGameSolver:
                     else:
                         w = self.mu * w
                         k += 1
+            print('iteration ',iteration)
         return self.value_vector, policy
 
-    def __create_action_value_matrix(self, state, L_v, use_Lv):
+    def create_action_value_matrix(self, state, L_v, use_Lv):
         if use_Lv:
             value_vector = L_v
         else:
@@ -50,7 +53,9 @@ class MatrixGameSolver:
         return action_value_matrix
 
     def __solve_state(self, state, L_v=None, use_Lv=False):
-        action_value_matrix = self.__create_action_value_matrix(state, L_v, use_Lv)
+        if self.game.is_terminal_state(state):
+            return np.zeros(N_ACTIONS), np.zeros(N_ACTIONS),self.game.get_state_reward(state)
+        action_value_matrix = self.create_action_value_matrix(state, L_v, use_Lv)
         value, policy_x, policy_y = linprog_solve(np.array(action_value_matrix))
         return policy_x, policy_y, value
 
