@@ -10,6 +10,7 @@ N_ROW = 4
 N_COL = 4
 CRASH_BLOCKS = [(2, 2), (0, 2), (2, 1), (3, 1)]
 
+
 class Game:
     def __init__(self):
         self.n_rows = N_ROW
@@ -22,6 +23,8 @@ class Game:
         self.terminal_states = self.__initialize_terminal_states()
         self.rewards = self.__initialize_rewards()
         self.transitions = self.__initialize_transitions()
+
+        self.transition_from, self.transition_to = self.__convert_transition()
 
         print('Game initilized')
 
@@ -53,6 +56,31 @@ class Game:
         :return: transition matrix given that pair of action
         '''
         return np.array(self.transitions[(action_pair[0], action_pair[1])])
+
+    def __convert_transition(self):
+        from_mapping = []  # state -> {next_state : {action pair : prob}}, from state to next state
+        to_mapping = []  # from previous state to state
+        for state in range(self.get_n_states()):
+            from_mapping.append({})
+            to_mapping.append({})
+            for i in range(N_ACTIONS):
+                for j in range(N_ACTIONS):
+                    from_vector = self.get_state_transition((i, j))[state]
+                    to_vector = self.get_state_transition((i, j))[:, state]
+                    for next_state in range(len(from_vector)):
+                        probability = from_vector[next_state]
+                        if probability != 0:
+                            if next_state not in from_mapping[state]:
+                                from_mapping[state][next_state] = {}
+                            from_mapping[state][next_state][(i, j)] = probability
+
+                    for previous_state in range(len(to_vector)):
+                        probability = from_vector[previous_state]
+                        if probability != 0:
+                            if previous_state not in to_mapping[state]:
+                                to_mapping[state][previous_state] = {}
+                            to_mapping[state][previous_state][(i, j)] = probability
+        return from_mapping, to_mapping
 
     def __rc2state(self, row1, col1, row2, col2):
         '''
@@ -204,6 +232,13 @@ class Game:
         return False
 
     def get_next_state(self, state, action1, action2):
+        '''
+        return next state if action 1 and action 2 BOTH SUCCEED
+        :param state: current state
+        :param action1: action executed by p1
+        :param action2: action executed by p2
+        :return: next state if action1 and action2 both succeed
+        '''
         row1, col1, row2, col2 = self.__state2rc(state)
         if self.__is_action_valid(row1, col1, action1):
             new_pos1 = self.__create_new_rc_from_action(row1, col1, action1)

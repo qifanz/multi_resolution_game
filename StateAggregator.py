@@ -12,6 +12,11 @@ class StateAggregator:
         for i in range(game.get_n_states()):
             mapping.append([[], [], []])  # 0 for periphery, 1 for boundary, 2 for interior
         for original_state in range(game.get_n_states()):
-            aggregated_index = int(original_state / self.aggregate_factor)
+            aggregated_index = self.__get_aggregate_index(original_state)
             is_periphery = False
             is_boundary = False
+            
+
+
+    def __get_aggregate_index(self,original_index):
+        return int(original_index/self.aggregate_factor)
