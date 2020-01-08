@@ -7,4 +7,3 @@ if __name__ == '__main__':
     state = int(sys.argv[1])
     game = Game()
     game.print_state(state)
-

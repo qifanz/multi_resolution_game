@@ -1,10 +1,14 @@
 from Game import *
 from NashSolver import *
 from NashValidator import *
+from StateAggregator import *
 
-game = Game.Game()
+game = Game()
+state_aggregator = StateAggregator()
+state_aggregator.aggregate(game)
+
 nash_solver = NashSolver(game)
-#nash_solver.solve()
+# nash_solver.solve()
 nash_validator = NashValidator(game)
 nash_validator.solve()
 f = open('value.pkl', 'rb')

@@ -1,5 +1,6 @@
 N_ACTIONS = 4
 
+
 def get_str(action):
     if action == 0:
         return 'Up'
@@ -9,6 +10,7 @@ def get_str(action):
         return 'Down'
     elif action == 3:
         return 'Right'
+
 
 def get_movement(action):
     assert (action < N_ACTIONS)

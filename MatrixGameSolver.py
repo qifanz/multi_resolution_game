@@ -46,11 +46,11 @@ def __linprog_solver_row(value_matrix):
 
 
 def linprog_solve(value_matrix):
-    #rps = nash.Game(np.array(value_matrix))
-    #eqs = rps.support_enumeration()
+    # rps = nash.Game(np.array(value_matrix))
+    # eqs = rps.support_enumeration()
     px, value = __linprog_solver_row(value_matrix)
     py, v2 = __linprog_solver_col(value_matrix)
-    #policy_x, policy_y = list(eqs)[0]
+    # policy_x, policy_y = list(eqs)[0]
     return value, py, px
 
 

@@ -231,7 +231,7 @@ class Game:
             return True
         return False
 
-    def get_next_state(self, state, action1, action2):
+    def get_success_next_state(self, state, action1, action2):
         '''
         return next state if action 1 and action 2 BOTH SUCCEED
         :param state: current state
