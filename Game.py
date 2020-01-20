@@ -5,9 +5,9 @@ from math import floor
 STANDARD_REWARD = 1
 CRASH_REWARD = -20
 END_REWARD = -20
-ACTION_SUCCESSFUL_RATE = 0.75
-N_ROW = 4
-N_COL = 4
+ACTION_SUCCESSFUL_RATE = 0.8
+N_ROW = 5
+N_COL = 5
 CRASH_BLOCKS = [(2, 2), (0, 2), (2, 1), (3, 1)]
 
 
@@ -82,7 +82,7 @@ class Game:
                             to_mapping[state][previous_state][(i, j)] = probability
         return from_mapping, to_mapping
 
-    def __rc2state(self, row1, col1, row2, col2):
+    def rc2state(self, row1, col1, row2, col2):
         '''
         Convert row, col of player 1 and 2 to index of state
         :param row1: row of player1
@@ -96,7 +96,7 @@ class Game:
         state = state1 * self.n_blocks + state2
         return state
 
-    def __state2rc(self, state):
+    def state2rc(self, state):
         '''
         Convert index of state to row, col of player 1 and 2
         :param state: index of state
@@ -121,8 +121,8 @@ class Game:
             for i in range(self.n_rows):
                 for j in range(self.n_cols):
                     if (i, j) != crash_block:
-                        crash_states_p2.append(self.__rc2state(i, j, crash_block[0], crash_block[1]))
-                        crash_states_p1.append(self.__rc2state(crash_block[0], crash_block[1], i, j))
+                        crash_states_p2.append(self.rc2state(i, j, crash_block[0], crash_block[1]))
+                        crash_states_p1.append(self.rc2state(crash_block[0], crash_block[1], i, j))
         return crash_states_p1, crash_states_p2
 
     def __initialize_states(self):
@@ -136,7 +136,7 @@ class Game:
             rewards[crash_state] = -CRASH_REWARD
         for i in range(self.n_rows):
             for j in range(self.n_cols):
-                rewards[self.__rc2state(i, j, i, j)] = END_REWARD
+                rewards[self.rc2state(i, j, i, j)] = END_REWARD
         return rewards
 
     def __initialize_terminal_states(self):
@@ -147,7 +147,7 @@ class Game:
             terminal_states.append(crash_state)
         for i in range(self.n_rows):
             for j in range(self.n_cols):
-                terminal_states.append(self.__rc2state(i, j, i, j))
+                terminal_states.append(self.rc2state(i, j, i, j))
         return terminal_states
 
     def __initialize_transitions(self):
@@ -172,14 +172,14 @@ class Game:
         :return: list of tuples of new state and possibility.
         '''
         res = []
-        row1, col1, row2, col2 = self.__state2rc(state)
+        row1, col1, row2, col2 = self.state2rc(state)
         single_transition_1 = self.__get_single_state_transition(row1, col1, action1)
         single_transition_2 = self.__get_single_state_transition(row2, col2, action2)
         # Start cross product to create full transition
         for transition_1 in single_transition_1:
             for transition_2 in single_transition_2:
                 prob = transition_1[1] * transition_2[1]
-                state = self.__rc2state(transition_1[0][0], transition_1[0][1], transition_2[0][0], transition_2[0][1])
+                state = self.rc2state(transition_1[0][0], transition_1[0][1], transition_2[0][0], transition_2[0][1])
                 res.append((state, prob))
         return res
 
@@ -239,7 +239,7 @@ class Game:
         :param action2: action executed by p2
         :return: next state if action1 and action2 both succeed
         '''
-        row1, col1, row2, col2 = self.__state2rc(state)
+        row1, col1, row2, col2 = self.state2rc(state)
         if self.__is_action_valid(row1, col1, action1):
             new_pos1 = self.__create_new_rc_from_action(row1, col1, action1)
         else:
@@ -248,10 +248,10 @@ class Game:
             new_pos2 = self.__create_new_rc_from_action(row2, col2, action2)
         else:
             new_pos2 = row2, col2
-        return self.__rc2state(new_pos1[0], new_pos1[1], new_pos2[0], new_pos2[1])
+        return self.rc2state(new_pos1[0], new_pos1[1], new_pos2[0], new_pos2[1])
 
     def print_state(self, state):
-        row1, col1, row2, col2 = self.__state2rc(state)
+        row1, col1, row2, col2 = self.state2rc(state)
         print('----------------')
         for i in range(self.n_rows):
             line = ''

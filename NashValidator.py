@@ -46,8 +46,8 @@ class NashValidator:
                     if action_Q > best_Q:
                         best_Q = action_Q
                 new_value_vector.append(best_Q)
-            diff = np.sum(np.subtract(np.array(new_value_vector), np.array(self.value_vector)))
-            convergence_flag = diff < 10e-20
+            diff = np.sum(np.abs(np.subtract(np.array(new_value_vector), np.array(self.value_vector))))
+            convergence_flag = diff < 10e-3
             self.value_vector = new_value_vector.copy()
             print('iteration ', iteration)
             iteration += 1

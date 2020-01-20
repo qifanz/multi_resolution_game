@@ -38,7 +38,7 @@ class StateAggregator:
         aggregated_states = AggStates(n_aggregated_states)
 
         for original_state in range(game.get_n_states()):
-            aggregated_index = self.__get_aggregate_index(original_state)
+            aggregated_index = self.__get_aggregate_index(game, original_state)
             is_boundary = False
             next_states = game.transition_from[original_state].keys()
             for next_state in next_states:
@@ -70,5 +70,13 @@ class StateAggregator:
         # TODO: wait for clarification
         pass
 
-    def __get_aggregate_index(self, original_index):
-        return int(original_index / self.aggregate_factor)
+    def __get_aggregate_index(self, game, original_index):
+        row1, col1, row2, col2 = game.state2rc(original_index)
+        aggregate_row_count = math.ceil(game.n_rows / self.aggregate_factor)
+        aggregate_col_count = math.ceil(game.n_cols / self.aggregate_factor)
+        count = aggregate_row_count * aggregate_col_count
+        new_index = count * (
+                int(row1 / self.aggregate_factor) * aggregate_col_count + int(col1 / self.aggregate_factor)) + (
+                            int(row2 / self.aggregate_factor) * aggregate_col_count + int(
+                        col2 / self.aggregate_factor))
+        return new_index

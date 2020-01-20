@@ -24,7 +24,7 @@ class NashSolver:
             L_v, policy = self.__calc_L()
             psi_v = self.__calc_psi(L_v, self.value_vector)
             J_v = self.__calc_J(psi_v)
-            if J_v <= 10e-20:
+            if J_v <= 10e-10:
                 converge_flag = True
             else:
                 D_k, I_subtract_P = self.__cal_D(policy, psi_v)
