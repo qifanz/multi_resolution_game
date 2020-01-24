@@ -48,7 +48,7 @@ class StateAggregator:
         for original_state in range(game.get_n_states()):
             aggregated_index = self.get_aggregate_index(game, original_state)
             is_boundary = False
-            next_states = game.transition_from[original_state].keys()
+            next_states = game.transition_from[original_state]
             for next_state in next_states:
                 if aggregated_index != self.get_aggregate_index(next_state):
                     is_boundary = True
@@ -104,6 +104,7 @@ class StateAggregator:
                                 P_out[i, j] = game.get_state_transition((a1, a2))[s, s_prime]
 
                         phi = np.dot(np.subtract(np.eye(len(original_states)), P_within).T, P_out)
+
 
                         whole_aggregated_transitions[(a1,a2)][gamma, gamma_prime] = np.sum(phi) / len(boundaries)
 

@@ -6,8 +6,8 @@ STANDARD_REWARD = 1
 CRASH_REWARD = -20
 END_REWARD = -20
 ACTION_SUCCESSFUL_RATE = 0.8
-N_ROW = 5
-N_COL = 5
+N_ROW = 8
+N_COL = 8
 CRASH_BLOCKS = [(2, 2), (0, 2), (2, 1), (3, 1)]
 
 
@@ -22,9 +22,9 @@ class Game:
         self.crash_states_p1, self.crash_states_p2 = self.__initialize_crash_states()
         self.terminal_states = self.__initialize_terminal_states()
         self.rewards = self.__initialize_rewards()
-        self.transitions = self.__initialize_transitions()
+        self.transitions, self.transition_from, self.transition_to = self.__initialize_transitions()
 
-        self.transition_from, self.transition_to = self.__convert_transition()
+        #self.transition_from, self.transition_to = self.__convert_transition()
 
         print('Game initilized')
 
@@ -152,6 +152,12 @@ class Game:
 
     def __initialize_transitions(self):
         whole_transition_matrix = {}
+        possible_from = []  # state -> {next_state}
+        possible_to = []  # from previous state to state
+        for i in range(self.get_n_states()):
+            possible_from.append(set())
+            possible_to.append(set())
+
         n_states = self.get_n_states()
         for action1 in range(N_ACTIONS):
             for action2 in range(N_ACTIONS):
@@ -159,9 +165,14 @@ class Game:
                 for i in range(n_states):
                     state_transition = self.__get_possible_transition(i, action1, action2)
                     for state_prob_tuple in state_transition:
-                        transition_matrix[i, int(state_prob_tuple[0])] = state_prob_tuple[1]
+                        next_state = int(state_prob_tuple[0]) # avoid type bug
+                        prob = state_prob_tuple[1]
+                        transition_matrix[i, next_state] = prob
+                        if prob != 0:
+                            possible_from[i].add(next_state)
+                            possible_to[next_state].add(i)
                 whole_transition_matrix[(action1, action2)] = transition_matrix
-        return whole_transition_matrix
+        return whole_transition_matrix, possible_from, possible_to
 
     def __get_possible_transition(self, state, action1, action2):
         '''

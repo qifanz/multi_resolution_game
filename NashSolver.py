@@ -2,6 +2,9 @@ from MatrixGameSolver import *
 import numpy as np
 from Actions import *
 import pickle
+import warnings
+warnings.filterwarnings('ignore', '.*Ill-conditioned*')
+
 
 POLICY_FILE = 'policy.pkl'
 VALUE_FILE = 'value.pkl'
