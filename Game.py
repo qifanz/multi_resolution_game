@@ -6,10 +6,10 @@ STANDARD_REWARD = 1
 CRASH_REWARD = -20
 END_REWARD = -20
 ACTION_SUCCESSFUL_RATE = 0.8
-N_ROW = 8
-N_COL = 8
+N_ROW = 9
+N_COL = 9
 CRASH_BLOCKS = [(2, 2), (0, 2), (2, 1), (3, 1)]
-
+DEBUG = True
 
 class Game:
     def __init__(self):
@@ -55,7 +55,7 @@ class Game:
         :param action_pair: tuple of actions (action of player1, action of player 2)
         :return: transition matrix given that pair of action
         '''
-        return np.array(self.transitions[(action_pair[0], action_pair[1])])
+        return self.transitions[(action_pair[0], action_pair[1])]
 
     def __convert_transition(self):
         from_mapping = []  # state -> {next_state : {action pair : prob}}, from state to next state
@@ -260,6 +260,8 @@ class Game:
         else:
             new_pos2 = row2, col2
         return self.rc2state(new_pos1[0], new_pos1[1], new_pos2[0], new_pos2[1])
+
+
 
     def print_state(self, state):
         row1, col1, row2, col2 = self.state2rc(state)

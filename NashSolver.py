@@ -3,11 +3,14 @@ import numpy as np
 from Actions import *
 import pickle
 import warnings
+import time
+
 warnings.filterwarnings('ignore', '.*Ill-conditioned*')
 
+POLICY_FILE = './data/policy'
+VALUE_FILE = './data/value'
 
-POLICY_FILE = 'policy.pkl'
-VALUE_FILE = 'value.pkl'
+DEBUG = False
 
 
 class NashSolver:
@@ -38,14 +41,15 @@ class NashSolver:
                         self.value_vector = np.add(self.value_vector, w * D_k)
                         break
                     else:
+                        print('Test inequality failed, k = ', k)
                         w = self.mu * w
                         k += 1
             print('iteration ', iteration)
 
-        f = open(POLICY_FILE, 'wb')
+        f = open(POLICY_FILE + '_' + str(self.game.n_rows) + '_' + str(self.game.n_cols) + '.pkl', 'wb')
         pickle.dump(policy, f)
         f.close()
-        f = open(VALUE_FILE, 'wb')
+        f = open(VALUE_FILE + '_' + str(self.game.n_rows) + '_' + str(self.game.n_cols) + '.pkl', 'wb')
         pickle.dump(self.value_vector, f)
         f.close()
 
@@ -62,16 +66,20 @@ class NashSolver:
         for i in range(N_ACTIONS):
             for j in range(N_ACTIONS):
                 transition_vector = self.game.get_state_transition((i, j))[state]
-                for next_state in range(len(transition_vector)):
-                    probability = transition_vector[next_state]
-                    action_value_matrix[i, j] += self.gamma * probability * value_vector[next_state]
+                action_value_matrix[i, j] += self.gamma * np.dot(transition_vector, value_vector)
         return action_value_matrix
 
     def __solve_state(self, state, L_v=None, use_Lv=False):
         if self.game.is_terminal_state(state):
             return np.zeros(N_ACTIONS), np.zeros(N_ACTIONS), self.game.get_state_reward(state)
+        start = time.time()
         action_value_matrix = self.create_action_value_matrix(state, L_v, use_Lv)
+        end = time.time()
+        self.debug(['Create M used', end - start])
+        start = time.time()
         value, policy_x, policy_y = linprog_solve(np.array(action_value_matrix))
+        end = time.time()
+        self.debug(['Linprog solver used', end - start])
         return policy_x, policy_y, value
 
     def __calc_L(self, new_v=None, use_new_v=False):
@@ -112,3 +120,11 @@ class NashSolver:
         left = self.__calc_J(new_psi) - j_v
         right = self.alpha * w * np.dot(self.__calc_delta_J(psi_v, I_subtract_P), d_k)
         return left <= right
+
+    def debug(self, strs):
+        if DEBUG:
+            line = ''
+            for s in strs:
+                line += str(s)
+                line += ' '
+            print(line)
