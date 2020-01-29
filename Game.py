@@ -8,7 +8,7 @@ END_REWARD = -20
 ACTION_SUCCESSFUL_RATE = 0.8
 N_ROW = 9
 N_COL = 9
-CRASH_BLOCKS = [(2, 2), (0, 2), (2, 1), (3, 1)]
+CRASH_BLOCKS = [(4,4)]
 DEBUG = True
 
 class Game:
@@ -267,7 +267,7 @@ class Game:
         row1, col1, row2, col2 = self.state2rc(state)
         print('----------------')
         for i in range(self.n_rows):
-            line = ''
+            line = '|'
             for j in range(self.n_cols):
                 if i == row1 == row2 and j == col1 == col2:
                     line += (' O |')
@@ -281,7 +281,7 @@ class Game:
                     else:
                         line += ('   |')
             print(line)
-            print('----------------')
+            #print('----------------')
 
         mat = np.zeros((self.n_rows, self.n_cols))
         for i in range(self.n_rows):
