@@ -18,7 +18,7 @@ class NashSolver:
         self.game = game
         self.alpha = 0.5  # convergence factor
         self.mu = 0.6
-        self.gamma = 0.95
+        self.gamma = 0.9
         self.beta = 0.9
         self.value_vector = game.rewards  # set initial estimation to rewards
 
@@ -54,6 +54,13 @@ class NashSolver:
         f.close()
 
         return self.value_vector, policy
+
+    def get_policy_of_all_states(self):
+        policies_x = []
+        for state in range(self.game.get_n_states()):
+            px, py, v = self.__solve_state(state)
+            policies_x.append(px)
+        return policies_x
 
     def create_action_value_matrix(self, state, L_v, use_Lv):
         if use_Lv:

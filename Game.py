@@ -2,14 +2,17 @@ import numpy as np
 from Actions import *
 from math import floor
 
-STANDARD_REWARD = 1
-CRASH_REWARD = -20
-END_REWARD = -20
-ACTION_SUCCESSFUL_RATE = 0.8
-N_ROW = 9
-N_COL = 9
-CRASH_BLOCKS = [(4,4)]
-DEBUG = True
+STANDARD_REWARD = 0.01
+CRASH_REWARD = -2
+END_REWARD = -2
+EVASION_REWARD = 2
+ACTION_SUCCESSFUL_RATE = 0.85
+N_ROW = 6
+N_COL = 6
+CRASH_BLOCKS = [(5, 0), (3, 2), (3, 3), (4, 2), (5, 2), (5, 3), (5, 4), (1, 5)]
+EVASION_BLOCKS = [(4, 3), (5, 1)]
+
+DEBUG = False
 
 class Game:
     def __init__(self):
@@ -20,6 +23,7 @@ class Game:
 
         self.states = self.__initialize_states()
         self.crash_states_p1, self.crash_states_p2 = self.__initialize_crash_states()
+        self.evasion_states = self.__initalize_evasion_states()
         self.terminal_states = self.__initialize_terminal_states()
         self.rewards = self.__initialize_rewards()
         self.transitions, self.transition_from, self.transition_to = self.__initialize_transitions()
@@ -125,6 +129,14 @@ class Game:
                         crash_states_p1.append(self.rc2state(crash_block[0], crash_block[1], i, j))
         return crash_states_p1, crash_states_p2
 
+    def __initalize_evasion_states(self):
+        evaison_states = []
+        for state in EVASION_BLOCKS:
+            for i in range(self.n_rows):
+                for j in range(self.n_cols):
+                    evaison_states.append(self.rc2state(i, j, state[0], state[1]))
+        return evaison_states
+
     def __initialize_states(self):
         return np.arange(0, self.n_blocks * self.n_blocks)
 
@@ -137,6 +149,8 @@ class Game:
         for i in range(self.n_rows):
             for j in range(self.n_cols):
                 rewards[self.rc2state(i, j, i, j)] = END_REWARD
+        for evasion_state in self.evasion_states:
+            rewards[evasion_state] = EVASION_REWARD
         return rewards
 
     def __initialize_terminal_states(self):
@@ -148,6 +162,8 @@ class Game:
         for i in range(self.n_rows):
             for j in range(self.n_cols):
                 terminal_states.append(self.rc2state(i, j, i, j))
+        for evasion_state in self.evasion_states:
+            terminal_states.append(evasion_state)
         return terminal_states
 
     def __initialize_transitions(self):
