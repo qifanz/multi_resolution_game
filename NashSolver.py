@@ -1,4 +1,4 @@
-from MatrixGameSolver import *
+from Util.MatrixGameSolver import *
 import numpy as np
 from Actions import *
 import pickle
@@ -7,8 +7,8 @@ import time
 
 warnings.filterwarnings('ignore', '.*Ill-conditioned*')
 
-POLICY_FILE = './data/policy'
-VALUE_FILE = './data/value'
+POLICY_FILE = './data/nash_policies.pkl'
+VALUE_FILE = './data/nash_values.pkl'
 
 DEBUG = False
 
@@ -20,7 +20,7 @@ class NashSolver:
         self.mu = 0.6
         self.gamma = 0.9
         self.beta = 0.9
-        self.value_vector = game.rewards  # set initial estimation to rewards
+        self.value_vector = np.zeros(game.get_n_states())  # set initial estimation to rewards
 
     def solve(self):
         converge_flag = False
@@ -30,7 +30,7 @@ class NashSolver:
             L_v, policy = self.__calc_L()
             psi_v = self.__calc_psi(L_v, self.value_vector)
             J_v = self.__calc_J(psi_v)
-            if J_v <= 10e-10:
+            if J_v <= 10e-20:
                 converge_flag = True
             else:
                 D_k, I_subtract_P = self.__cal_D(policy, psi_v)
@@ -46,10 +46,10 @@ class NashSolver:
                         k += 1
             print('iteration ', iteration)
 
-        f = open(POLICY_FILE + '_' + str(self.game.n_rows) + '_' + str(self.game.n_cols) + '.pkl', 'wb')
+        f = open(POLICY_FILE , 'wb')
         pickle.dump(policy, f)
         f.close()
-        f = open(VALUE_FILE + '_' + str(self.game.n_rows) + '_' + str(self.game.n_cols) + '.pkl', 'wb')
+        f = open(VALUE_FILE , 'wb')
         pickle.dump(self.value_vector, f)
         f.close()
 
@@ -68,17 +68,17 @@ class NashSolver:
         else:
             value_vector = self.value_vector
         immediate_reward = self.game.get_state_reward(state)
-        action_value_matrix = np.ones((N_ACTIONS, N_ACTIONS)) * immediate_reward
+        action_value_matrix = np.zeros((N_ACTIONS, N_ACTIONS))
 
         for i in range(N_ACTIONS):
             for j in range(N_ACTIONS):
                 transition_vector = self.game.get_state_transition((i, j))[state]
-                action_value_matrix[i, j] += self.gamma * np.dot(transition_vector, value_vector)
+                action_value_matrix[i, j] = np.dot(transition_vector, self.game.rewards) + self.gamma * np.dot(transition_vector, value_vector)
         return action_value_matrix
 
     def __solve_state(self, state, L_v=None, use_Lv=False):
         if self.game.is_terminal_state(state):
-            return np.zeros(N_ACTIONS), np.zeros(N_ACTIONS), self.game.get_state_reward(state)
+            return np.zeros(N_ACTIONS), np.zeros(N_ACTIONS), 0
         start = time.time()
         action_value_matrix = self.create_action_value_matrix(state, L_v, use_Lv)
         end = time.time()

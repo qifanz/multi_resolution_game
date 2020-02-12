@@ -2,20 +2,22 @@ import numpy as np
 from Actions import *
 from math import floor
 
-STANDARD_REWARD = 0.01
+STANDARD_REWARD = -0.01
 CRASH_REWARD = -2
 END_REWARD = -2
 EVASION_REWARD = 2
-ACTION_SUCCESSFUL_RATE = 0.85
-N_ROW = 6
-N_COL = 6
-CRASH_BLOCKS = [(5, 0), (3, 2), (3, 3), (4, 2), (5, 2), (5, 3), (5, 4), (1, 5)]
-EVASION_BLOCKS = [(4, 3), (5, 1)]
+ACTION_SUCCESSFUL_RATE = 0.6
+N_ROW = 4
+N_COL = 4
+CRASH_BLOCKS = [(0,1),(2,0),(3,2)]
+EVASION_BLOCKS = [(0, 0), (3, 3)]
+INIT_STATE = (3, 0, 0, 3)
 
 DEBUG = False
 
 class Game:
     def __init__(self):
+        self.n_absorbing_type = 4
         self.n_rows = N_ROW
         self.n_cols = N_COL
         self.crash_blocks = CRASH_BLOCKS
@@ -24,13 +26,30 @@ class Game:
         self.states = self.__initialize_states()
         self.crash_states_p1, self.crash_states_p2 = self.__initialize_crash_states()
         self.evasion_states = self.__initalize_evasion_states()
-        self.terminal_states = self.__initialize_terminal_states()
+        self.terminal_states, self.terminal_type = self.__initialize_terminal_states()
         self.rewards = self.__initialize_rewards()
         self.transitions, self.transition_from, self.transition_to = self.__initialize_transitions()
 
         #self.transition_from, self.transition_to = self.__convert_transition()
 
         print('Game initilized')
+
+    def get_state_absorbing_type(self, state):
+        if not self.is_terminal_state(state):
+            raise Exception("State is not an absorbing state")
+        return self.terminal_type[state]
+
+    def get_absorbing_type_reward(self, type):
+        if type == 0:
+            return CRASH_REWARD
+        elif type == 1:
+            return -CRASH_REWARD
+        elif type == 2:
+            return END_REWARD
+        elif type == 3:
+            return EVASION_REWARD
+        else:
+            raise Exception("Absorbing type error")
 
     def is_crash_state(self, state):
         return state in self.crash_states_p1 or state in self.crash_states_p2
@@ -134,7 +153,7 @@ class Game:
         for state in EVASION_BLOCKS:
             for i in range(self.n_rows):
                 for j in range(self.n_cols):
-                    evaison_states.append(self.rc2state(i, j, state[0], state[1]))
+                    evaison_states.append(self.rc2state( state[0], state[1],i,j))
         return evaison_states
 
     def __initialize_states(self):
@@ -155,16 +174,23 @@ class Game:
 
     def __initialize_terminal_states(self):
         terminal_states = []
+        terminal_type = {}
         for crash_state in self.crash_states_p1:
             terminal_states.append(crash_state)
+            terminal_type[crash_state] = 0
         for crash_state in self.crash_states_p2:
             terminal_states.append(crash_state)
+            terminal_type[crash_state] = 1
         for i in range(self.n_rows):
             for j in range(self.n_cols):
                 terminal_states.append(self.rc2state(i, j, i, j))
+                terminal_type[self.rc2state(i, j, i, j)] = 2
+
         for evasion_state in self.evasion_states:
             terminal_states.append(evasion_state)
-        return terminal_states
+            terminal_type[evasion_state] = 3
+
+        return terminal_states, terminal_type
 
     def __initialize_transitions(self):
         whole_transition_matrix = {}

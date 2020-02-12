@@ -3,7 +3,7 @@ import Game
 import pickle
 
 VALUE_FILE = './data/value_validator_9_9.pkl'
-POLICY_FILE = './data/policy_9_9.pkl'
+POLICY_FILE = '../data/policy_9_9.pkl'
 POLICY_VALIDATOR_FILE = './data/policy_validator_9_9.pkl'
 
 

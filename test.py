@@ -1,6 +1,5 @@
-from Game import *
-from NashSolver import *
-from NashValidator import *
+from MultiResolutionSolver import MultiResolutionSolver
+from NashSolver import NashSolver
 from StateAggregator import *
 import time
 
@@ -8,6 +7,9 @@ start = time.time()
 game = Game()
 end = time.time()
 print('Init game used ', end - start, 's')
+
+#mrsolver = MultiResolutionSolver(game, 3)
+#values, policies = mrsolver.solve()
 
 #start = time.time()
 #state_aggregator = StateAggregator(game)

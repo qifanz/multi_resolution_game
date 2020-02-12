@@ -3,7 +3,7 @@ import sys
 from Game import Game
 import Actions
 
-POLICY_FILE = 'policy.pkl'
+POLICY_FILE = '../data/policy_5_5.pkl'
 
 
 def import_policy():
